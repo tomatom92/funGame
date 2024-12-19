@@ -1,0 +1,4 @@
+repository "funGame@drownthomas@cloud"
+  path "/"
+    br "/main"
+    co "/main"
