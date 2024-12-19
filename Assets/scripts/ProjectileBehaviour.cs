@@ -12,10 +12,12 @@ public class ProjectileBehaviour : MonoBehaviour
     Animator animator;
     public GameObject bulletOwner;
     public float bulletDamage;
+    private Collider2D bulletCollider;
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
+        bulletCollider = GetComponent<Collider2D>();
     }
 
     public void SetPlayerProj(bool input)
@@ -26,11 +28,19 @@ public class ProjectileBehaviour : MonoBehaviour
     {
         isEnemyProj = input;
     }
+    public void DestroyProjectile()
+    {
+        animator.SetTrigger("hit");
+        bulletCollider.enabled = false;
+        float animTime = animator.GetCurrentAnimatorStateInfo(0).length;
+        Destroy(gameObject, animTime + 0.5f);
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision != null)
         {
+            
             HPBar hpBar = collision.GetComponent<HPBar>();
             Rigidbody2D rb = collision.GetComponent<Rigidbody2D>();
 
@@ -54,26 +64,21 @@ public class ProjectileBehaviour : MonoBehaviour
                 enemy.GetComponent<EnemyController>().isStunned = true;
 
                 //animation
-                animator.SetTrigger("hit");
-
-                float animTime = animator.GetCurrentAnimatorStateInfo(0).length;
-                Destroy(gameObject, animTime + 0.5f);
+                DestroyProjectile();
 
             }//colliding with players
             else if (collision.CompareTag("Player") && !isPlayerProj)
             {
                 hpBar.RemoveHeart(projectileDamage);
-                animator.SetTrigger("hit");
-                float animTime = animator.GetCurrentAnimatorStateInfo(0).length;
-                Destroy(gameObject, animTime + 0.5f);
+                DestroyProjectile();
+
                 Debug.Log("Player HIT WITH PROJECTILE!");
             }
             //colliding with walls
             if (collision.CompareTag("EnemyCantWalkHere"))
             {
-                animator.SetTrigger("hit");
-                float animTime = animator.GetCurrentAnimatorStateInfo(0).length;
-                Destroy(gameObject, animTime + 0.5f);
+                DestroyProjectile();
+
             }
             //colliding with boss
             if (collision.CompareTag("Boss"))
@@ -81,13 +86,11 @@ public class ProjectileBehaviour : MonoBehaviour
                 Debug.Log("hit boss");
                 //collision.GetComponent<BossHealth>().TakeDamage(bulletDamage);
                 collision.GetComponent<BossHealth>().TakeDamage(20);
-                //animations
-                animator.SetTrigger("hit");
-                float animTime = animator.GetCurrentAnimatorStateInfo(0).length;
-                //destroy
-                Destroy(gameObject, animTime + 0.5f);
+                //animations                
+                DestroyProjectile();
+
             }
-            
+
         }
     }
 }

@@ -1,3 +1,4 @@
+using Cinemachine;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Playables;  // Required for Timeline
@@ -8,6 +9,7 @@ public class BossFightManager : MonoBehaviour
     public GameObject player;  // Reference to the player
     public BossUI bossUI;  // Reference to the boss health UI
     public PlayableDirector timelineDirector;  // Timeline component for the cutscene
+
 
     public bool isFightActive = false;
 
@@ -34,19 +36,18 @@ public class BossFightManager : MonoBehaviour
             crocodile.SetState(CrocBoss.BossState.Idle);
             timelineDirector.Play();
             StartCoroutine(WaitForCutsceneToEnd());
-            
-            Debug.Log($"boss State: {crocodile.GetState()}");
+
+            //Debug.Log($"boss State: {crocodile.GetState()}");
         }
         else
         {
             // If no Timeline is assigned, start the fight immediately
             crocodile.SetState(CrocBoss.BossState.Idle);
             StartBossFight();
-            crocodile.SetState(CrocBoss.BossState.Chase);
-            Debug.Log($"boss State: {crocodile.GetState()}");
+            //Debug.Log($"boss State: {crocodile.GetState()}");
         }
         //make boss chase player when fight starts after cutscene
-        
+
 
     }
 
@@ -54,20 +55,18 @@ public class BossFightManager : MonoBehaviour
     {
         if (timelineDirector != null)
         {
-            float timeElapsed = 0f;
-            while (timeElapsed < (float)timelineDirector.duration)
+            while (timelineDirector.state == PlayState.Playing)
             {
                 if (Input.GetKeyDown(KeyCode.Space))  // Replace with your preferred skip key
                 {
                     timelineDirector.time = timelineDirector.duration;  // Skip to the end
                     break;
                 }
-                timeElapsed += Time.deltaTime;
                 yield return null;
             }
         }
 
         StartBossFight();
+        crocodile.SetState(CrocBoss.BossState.Chase);
     }
-
 }

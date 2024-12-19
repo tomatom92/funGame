@@ -6,7 +6,7 @@ using UnityEngine.Tilemaps;
 
 public class CrocBoss : BossBase
 {
-    public enum BossState { Idle, GroundAttack, WaterMove, RageMode, Chase}
+    public enum BossState { Idle, GroundAttack, WaterMove, RageMode, Chase }
     private BossState currentState;
 
     public float phase2HealthThreshold = 50f;
@@ -31,6 +31,9 @@ public class CrocBoss : BossBase
     private BossFightManager fightManager;
     public bool isCutsceneActive = false; // Flag to disable boss behavior
 
+    public float hitboxOffsetDistance = 0.5f; // Adjust for visual effect
+
+
     protected override void Start()
     {
         base.Start();
@@ -53,7 +56,7 @@ public class CrocBoss : BossBase
             bossHealth.OnDeath += Die;
         }
         //ignore water collisions
-        
+
     }
 
     protected void Update()
@@ -120,7 +123,7 @@ public class CrocBoss : BossBase
 
         // Calculate the distance to the player
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
-        
+
         // Check if the boss should stop chasing (e.g., if another state is active)
         if (currentState != BossState.Chase) return;
 
@@ -130,7 +133,7 @@ public class CrocBoss : BossBase
             Vector2 direction = (player.position - transform.position).normalized;
             animator.SetFloat("moveX", direction.x);
             animator.SetFloat("moveY", direction.y);
-            
+
 
             // Update the boss's position towards the player
             transform.position += (Vector3)(moveSpeed * Time.deltaTime * direction);
@@ -140,8 +143,8 @@ public class CrocBoss : BossBase
         {
             // Transition to an attack state when in range
             currentState = BossState.GroundAttack;
-            
-            
+
+
         }
     }
 
@@ -154,17 +157,27 @@ public class CrocBoss : BossBase
         StartCoroutine(BiteAttackRoutine());
     }
     private IEnumerator BiteAttackRoutine()
-   {
+    {
         isAttacking = true;
-       yield return new WaitForSeconds(attackDelay);
-       Debug.Log("BITE");
-       biteAnimator.SetTrigger("bite");
-       biteAnimator.transform.position = player.position;
-       isAttacking = false;
-       //Vector3 offset = _spriteRenderer.flipX ? Vector3.left : Vector3.right;
-       //Vector3 attackPosition = transform.position + (offset * hitboxOffsetDistance);
 
+        
 
+        // Get the direction parameter from the animator
+        float directionValueX = animator.GetFloat("moveX");
+        float directionValueY = animator.GetFloat("moveY");
+        // Calculate offset based on direction parameter
+        Vector3 offset = new Vector3(directionValueX, directionValueY, 0);
+
+        // Calculate hitbox position
+        Vector3 attackPosition = transform.position + (offset * hitboxOffsetDistance);
+
+        // Set hitbox position
+        biteAnimator.transform.position = attackPosition;
+        biteAnimator.SetTrigger("bite");
+
+        yield return new WaitForSeconds(attackDelay);
+
+        isAttacking = false;
     }
 
     private void PerformWaterMove()
