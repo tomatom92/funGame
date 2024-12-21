@@ -54,7 +54,7 @@ public class ProjectileBehaviour : MonoBehaviour
                 GameObject enemy = collision.gameObject;
                 Vector2 enemyPos = rb.transform.position;
                 hpBar.RemoveHeart(projectileDamage);
-                Debug.Log("ENEMY HIT WITH PROJECTILE!");
+                Debug.Log($"{collision.name} ENEMY HIT WITH PROJECTILE!");
 
                 //enemy Knockback
                 Vector2 direction = (enemyPos - bulletPos).normalized;
@@ -83,7 +83,7 @@ public class ProjectileBehaviour : MonoBehaviour
             //colliding with boss
             if (collision.CompareTag("Boss"))
             {
-                Debug.Log("hit boss");
+                Debug.Log($"hit {collision.name}");
                 //collision.GetComponent<BossHealth>().TakeDamage(bulletDamage);
                 collision.GetComponent<BossHealth>().TakeDamage(20);
                 //animations                

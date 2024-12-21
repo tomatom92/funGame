@@ -41,7 +41,6 @@ public class HPBar : MonoBehaviour
 
         //filling heart array and setting health based on amount of child heart objects
         heartArray = new GameObject[healthHolder.transform.childCount];
-        hpRemaining = healthHolder.transform.childCount;
         for (int i = 0; i < healthHolder.transform.childCount; i++)
         {
             heartArray[i] = healthHolder.transform.GetChild(i).gameObject;
