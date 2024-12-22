@@ -5,11 +5,11 @@ using UnityEngine;
 public class CharacterBehaviour : MonoBehaviour
 {
     HPBar healthBar;
-    public bool isStunned = false;
-    public float stunTime = 0.7f;
-    public SpriteRenderer spriteRenderer;
+    //public bool isStunned = false;
+    //public float stunTime = 0.7f;
+    protected SpriteRenderer spriteRenderer;
 
-    private void Start()
+    protected virtual void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
     }

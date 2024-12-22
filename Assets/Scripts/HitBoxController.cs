@@ -5,12 +5,8 @@ using UnityEngine;
 public class HitBoxController : MonoBehaviour
 {
  
-    private Collider2D biteHitbox; // Assign the BiteHitbox in the Inspector
+    public Collider2D biteHitbox; // Assign the BiteHitbox in the Inspector
     
-    private void Start()
-    {
-        biteHitbox = GetComponent<Collider2D>();
-    }
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player")) // Check if it's the player

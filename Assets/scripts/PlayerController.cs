@@ -22,7 +22,7 @@ public class PlayerController : CharacterBehaviour
     [SerializeField] private float PROJECTILE_BASE_SPEED = 1.0f;
     [SerializeField] private float interactDist;
     private float attackCooldown = 0; //tracks cooldown
-    [SerializeField, Range(0,1)] float fireDelay = 1f; // Cooldown duration (time between attacks)
+    [SerializeField, Range(0, 1)] float fireDelay = 1f; // Cooldown duration (time between attacks)
 
     public float moveSpeed = 5f;
     public float sprintSpeed;
@@ -49,7 +49,6 @@ public class PlayerController : CharacterBehaviour
 
     private void Awake()
     {
-        isStunned = false;
         instance = this;
         float sprintSpeed = moveSpeed * 1.5f;
         rb = GetComponent<Rigidbody2D>();
@@ -143,7 +142,7 @@ public class PlayerController : CharacterBehaviour
 
     }
 
-    
+
     private void Fire(InputAction.CallbackContext context)
     {
         // Check if the cooldown has finished

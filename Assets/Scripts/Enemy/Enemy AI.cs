@@ -39,7 +39,7 @@ public class EnemyAI : MonoBehaviour
     }
     void UpdatePath()
     {
-        if (seeker.IsDone() && !enemyController.isStunned)
+        if (seeker.IsDone())
         {
             seeker.StartPath(rb.position, target.position, OnPathComplete);
         }

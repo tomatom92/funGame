@@ -28,10 +28,15 @@ public class ProjectileBehaviour : MonoBehaviour
     {
         isEnemyProj = input;
     }
+    private IEnumerator HitboxExtender()
+    {
+        yield return new WaitForSeconds(0.2f);
+        bulletCollider.enabled = false;
+    }
     public void DestroyProjectile()
     {
         animator.SetTrigger("hit");
-        bulletCollider.enabled = false;
+        HitboxExtender();
         float animTime = animator.GetCurrentAnimatorStateInfo(0).length;
         Destroy(gameObject, animTime + 0.5f);
     }
@@ -61,7 +66,6 @@ public class ProjectileBehaviour : MonoBehaviour
                 rb.AddForce(direction * knockBackForce);
 
                 //stun
-                enemy.GetComponent<EnemyController>().isStunned = true;
 
                 //animation
                 DestroyProjectile();

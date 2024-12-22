@@ -1,47 +1,62 @@
-using JetBrains.Annotations;
 using System.Collections;
-using Unity.VisualScripting.Antlr3.Runtime;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class CrocBoss : BossBase
 {
-    public enum BossState { Idle, GroundAttack, WaterMove, RageMode, Chase }
+    public enum BossState { Idle, GroundAttack, SpawnEnemy, RageMode, Chase, Underwater }
+    [Header("state")]
     private BossState currentState;
+    private BossState previousState;
+    private bool hasSpawnedEnemies = false; // Ensure enemies spawn only once
+    private bool hasSpawnedEnemiesInRage = false; // Flag to track enemy spawning in Rage Mode
 
-    public float phase2HealthThreshold = 50f;
+    [HideInInspector] public List<GameObject> spawnedEnemies = new List<GameObject>(); // Track spawned enemies
+
+    [Space]
+    [Header("Boss Stats")]
+
+    public float phase2HealthThreshold = 60f;
     public float rageHealthThreshold = 20f;
-
     public float moveSpeed = 2f;
-    public float attackDelay = 2f;
-    private float attackTimer = 0f;
+    public float rageSpeed = 3f;
+    public float biteDelay = 2f;
     public float attackRange = 1.5f;
+    public float hitboxOffsetDistance = 0.5f; // Adjust for visual effect
+
     private bool isAttacking = false;
-
+    private float attackTimer = 0f;
+    [Space]
+    [Header("components")]
     public Transform player;
-    public LayerMask attackLayer;
-
-    private BossUI bossUI;
-    private Animator animator;
+    public Collider2D waterCollider;
     public Animator biteAnimator;  // Animator for the bite attack
+    private Animator animator;
     private SpriteRenderer spriteRenderer;
     private Collider2D hurtBox;
-    public Collider2D tilemapCollider;
 
+    private BossEffects bossEffects;
     private BossFightManager fightManager;
-    public bool isCutsceneActive = false; // Flag to disable boss behavior
 
-    public float hitboxOffsetDistance = 0.5f; // Adjust for visual effect
+    [Space]
+    [Header("Boss minions")]
+    public GameObject enemyPrefab;
+    public Transform[] spawnPoints;
+    public int enemiesToSpawn = 2;
+    public int spawnDelay;
+
+    [HideInInspector] public bool isCutsceneActive = false; // Flag to disable boss behavior
+    private float rageBite;
 
 
     protected override void Start()
     {
         base.Start();
         currentState = BossState.Idle;
-
+        previousState = currentState;
         // Get references to the health and UI scripts
         bossHealth = GetComponent<BossHealth>();
-        bossUI = FindObjectOfType<BossUI>();  // Find the BossHealthBar object in the scene
+        bossEffects = GetComponent<BossEffects>();
 
         animator = GetComponent<Animator>();
 
@@ -56,7 +71,7 @@ public class CrocBoss : BossBase
             bossHealth.OnDeath += Die;
         }
         //ignore water collisions
-
+        Physics2D.IgnoreCollision(hurtBox, waterCollider);
     }
 
     protected void Update()
@@ -65,28 +80,34 @@ public class CrocBoss : BossBase
         if (isCutsceneActive) return;
         if (bossHealth.isDead) return;
 
+        //check if spawned enemies are dead
+        spawnedEnemies.RemoveAll(enemy => enemy == null);
+
+        StartCoroutine(PrintState());
         HandleStates();
         attackTimer -= Time.deltaTime;
     }
+
     public void SetState(BossState state)
     {
         currentState = state;
     }
+
     public BossState GetState()
     {
         return currentState;
     }
 
-    //BOSS STATE MACHINE
+    // BOSS STATE MACHINE
     private void HandleStates()
     {
         if (bossHealth.currentHealth <= rageHealthThreshold)
         {
             currentState = BossState.RageMode;
         }
-        else if (bossHealth.currentHealth <= phase2HealthThreshold)
+        else if (bossHealth.currentHealth <= phase2HealthThreshold && !hasSpawnedEnemies)
         {
-            currentState = BossState.WaterMove;
+            currentState = BossState.SpawnEnemy;
         }
         else if (Vector2.Distance(transform.position, player.position) < attackRange)
         {
@@ -97,26 +118,29 @@ public class CrocBoss : BossBase
             currentState = BossState.Chase;
         }
 
-        //Debug.Log($"Current State: {currentState}"); // Log the current state
         switch (currentState)
         {
             case BossState.Idle:
-                // Maybe idle animations or effects.
                 break;
             case BossState.GroundAttack:
-                PerformGroundAttack();
+                PerformGroundAttack(biteDelay);
                 break;
-            case BossState.WaterMove:
-                PerformWaterMove();
+            case BossState.SpawnEnemy:
+                PerformSpawnEnemy();
                 break;
             case BossState.RageMode:
                 PerformRageMode();
                 break;
             case BossState.Chase:
                 PerformChase(); // Call the chase logic
+                spriteRenderer.enabled = true;
+                hurtBox.enabled = true;
                 break;
         }
+
+        previousState = currentState;
     }
+
     private void PerformChase()
     {
         if (player == null) return;
@@ -128,43 +152,38 @@ public class CrocBoss : BossBase
         if (currentState != BossState.Chase) return;
 
         // Move towards the player if out of attack range
-        if (distanceToPlayer > attackRange) // Example stopping distance for an attack
+        if (distanceToPlayer > attackRange)
         {
             Vector2 direction = (player.position - transform.position).normalized;
             animator.SetFloat("moveX", direction.x);
             animator.SetFloat("moveY", direction.y);
 
-
             // Update the boss's position towards the player
             transform.position += (Vector3)(moveSpeed * Time.deltaTime * direction);
-
         }
         else
         {
             // Transition to an attack state when in range
             currentState = BossState.GroundAttack;
-
-
         }
     }
 
-
-    //ATTACKS
-    private void PerformGroundAttack()
+    // ATTACKS
+    private void PerformGroundAttack(float delay)
     {
         if (isAttacking) return; // If so, don't start a new one.
 
-        StartCoroutine(BiteAttackRoutine());
+        StartCoroutine(Bite(delay));
     }
-    private IEnumerator BiteAttackRoutine()
+
+    private IEnumerator Bite(float delay)
     {
         isAttacking = true;
-
-        
 
         // Get the direction parameter from the animator
         float directionValueX = animator.GetFloat("moveX");
         float directionValueY = animator.GetFloat("moveY");
+
         // Calculate offset based on direction parameter
         Vector3 offset = new Vector3(directionValueX, directionValueY, 0);
 
@@ -175,31 +194,101 @@ public class CrocBoss : BossBase
         biteAnimator.transform.position = attackPosition;
         biteAnimator.SetTrigger("bite");
 
-        yield return new WaitForSeconds(attackDelay);
+        yield return new WaitForSeconds(delay);
 
         isAttacking = false;
     }
 
-    private void PerformWaterMove()
+    private void PerformSpawnEnemy()
     {
-        // Crocodile dives underwater and creates water hazards
-        if (attackTimer <= 0f)
+        if (previousState != BossState.SpawnEnemy)
         {
-            //add separate cooldowns for each ability
-            //bossUI.HideHealthBar();
-            animator.SetTrigger("DiveAttack");
-            attackTimer = attackDelay;
-            //
+            bossEffects.PlayRoar();
+            HideBoss(); // Make the boss dive underwater
         }
+
+        if (!hasSpawnedEnemies)
+        {
+            // Spawn enemies only once
+            SpawnEnemies();
+            hasSpawnedEnemies = true;
+        }
+
+ 
+    }
+
+    private void SpawnEnemies()
+    {
+        if (enemyPrefab == null) return; // Ensure the prefab is assigned
+
+        spawnedEnemies.Clear(); // Reset the list of spawned enemies
+
+        if (spawnPoints != null && spawnPoints.Length > 0)
+        {
+            // Spawn enemies at predefined spawn points
+            for (int i = 0; i < enemiesToSpawn; i++)
+            {
+                Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+                Vector3 randomOffset = new Vector3(Random.Range(-2f, 2f), Random.Range(-2f, 2f), 0);
+                GameObject enemy = Instantiate(enemyPrefab, spawnPoint.position + randomOffset, Quaternion.identity);
+                spawnedEnemies.Add(enemy);
+
+                EnemyController enemyController = enemy.transform.GetChild(0).GetComponent<EnemyController>();
+                Physics2D.IgnoreCollision(enemy.transform.GetChild(0).GetComponent<Collider2D>(), waterCollider);
+                enemyController.target = player;
+            }
+        }
+    }
+
+    private void HideBoss()
+    {
+        spriteRenderer.enabled = false; // Hide the boss sprite
+        hurtBox.enabled = false; // Disable the collider
+        bossEffects.PlaySplashEffect(); // Play a visual effect for diving
+    }
+
+    private void ReappearBoss()
+    {
+        spriteRenderer.enabled = true; // Show the boss sprite
+        hurtBox.enabled = true; // Re-enable the collider
+        hasSpawnedEnemies = false; // Reset the spawn flag for the next phase
     }
 
     private void PerformRageMode()
     {
-        // Fast, aggressive attacks or a special mechanic (e.g., roars)
-        if (attackTimer <= 0f)
+        if (previousState != BossState.RageMode)
         {
-            animator.SetTrigger("RageAttack");
-            attackTimer = attackDelay / 2f; // Faster attacks
+            bossEffects.PlayRoar();
+        }
+        if (!hasSpawnedEnemiesInRage)
+        {
+            // Spawn enemies only once in Rage Mode
+            SpawnEnemies();
+            hasSpawnedEnemiesInRage = true;
+        }
+
+        // Fast, aggressive attacks
+        spriteRenderer.color = Color.red;
+        rageBite = biteDelay / 1.5f; // Faster attacks
+        if (player == null) return;
+
+        // Calculate the distance to the player
+        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+
+        // Move towards the player if out of attack range
+        if (distanceToPlayer > attackRange)
+        {
+            Vector2 direction = (player.position - transform.position).normalized;
+            animator.SetFloat("moveX", direction.x);
+            animator.SetFloat("moveY", direction.y);
+
+            
+            // Update the boss's position towards the player
+            transform.position += (Vector3)(rageSpeed * Time.deltaTime * direction);
+        }
+        else
+        {
+            PerformGroundAttack(rageBite);
         }
     }
 
@@ -207,20 +296,15 @@ public class CrocBoss : BossBase
     {
         bossHealth.isDead = true;
         animator.SetTrigger("Die");
-        // Handle death (e.g., drop loot, change environment)
 
         Debug.Log($"{name} died");
         spriteRenderer.enabled = false;
         hurtBox.enabled = false;
-
-        if (bossUI != null)
-        {
-            bossUI.HideHealthBar();  // Hide the health bar on death
-        }
+        animator.enabled = false;
     }
-    public void ActivateSpecialAbility()
+    private IEnumerator PrintState()
     {
-        // Example of a special move like a roar or a charge
+        yield return new WaitForSeconds(0.5f);
+        Debug.Log($"state is: {currentState}");
     }
-
 }
