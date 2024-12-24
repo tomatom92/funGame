@@ -30,7 +30,7 @@ public class DoorManager : MonoBehaviour
         doorCellPosition = map.WorldToCell(doorPos);
     }
 
-    public void OpenDoor()
+    public void OpenDoorWithKey()
     {
         //Debug.Log($"reached");
         if (doorOpened) return;
@@ -46,6 +46,17 @@ public class DoorManager : MonoBehaviour
         else
             Debug.Log("dont have key :(");
 
+
+    }
+    public void OpenDoor()
+    {
+        if (doorOpened) return;
+
+        Debug.Log($"door is opened");
+        doorOpened = true;
+        MapManager.Instance.map.SetTile(doorCellPosition, doorOpenedTile);
+        teleporter.isLocked = false;
+        gameObject.GetComponent<Collider2D>().enabled = false;
     }
     private void OnDrawGizmos()
     {

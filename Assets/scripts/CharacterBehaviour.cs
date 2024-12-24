@@ -8,6 +8,7 @@ public class CharacterBehaviour : MonoBehaviour
     //public bool isStunned = false;
     //public float stunTime = 0.7f;
     protected SpriteRenderer spriteRenderer;
+    public bool isDead = false;
 
     protected virtual void Start()
     {

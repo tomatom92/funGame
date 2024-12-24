@@ -54,6 +54,11 @@ PrefabInstance:
       propertyPath: homePoint
       value: 
       objectReference: {fileID: 8508461395879385517}
+    - target: {fileID: 2345421864564033297, guid: 6e7c44a373b977d42818fc1536a4ce3b,
+        type: 3}
+      propertyPath: detectionRange
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 2507718817506039562, guid: 6e7c44a373b977d42818fc1536a4ce3b,
         type: 3}
       propertyPath: m_AnchorMax.y

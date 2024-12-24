@@ -14,7 +14,7 @@ public class EnemyController : CharacterBehaviour
 
     [Space]
     [Header("Character stats")]
-    [SerializeField] float range;
+    [SerializeField] float detectionRange = 5;
     [SerializeField] private int damage = 1;
     Animator animator;
     AIPath aStar;
@@ -22,6 +22,7 @@ public class EnemyController : CharacterBehaviour
     public bool isTouching = false;
     private HPBar playerHpbar;
     private Transform player;
+
     //pathfinding
     [Space]
     [Header("Pathfinding")]
@@ -47,15 +48,14 @@ public class EnemyController : CharacterBehaviour
     void FixedUpdate()
     {
         //checking if moving
-        animator.SetBool("IsMoving", true);
 
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
 
-        // Move towards the player if in detection range
         if (target != null)
         {
-            if (distanceToPlayer < range)
+            // Move towards the player if in detection range
+            if (distanceToPlayer < detectionRange)
             {
                 Vector2 direction = (player.position - transform.position).normalized;
                 animator.SetFloat("moveX", direction.x);
@@ -68,8 +68,6 @@ public class EnemyController : CharacterBehaviour
             }
             else if(homePoint != null)
             {
-                 
-                //if you dont have a home point, just always gun for player.
                 agent.SetDestination(homePoint.position);
             }
         }
@@ -79,13 +77,11 @@ public class EnemyController : CharacterBehaviour
     public void onDeath()
     {
 
-    }
-    private float waitToHurt = 2f;
-    
+    }    
     private void OnDrawGizmosSelected()
     {
         // Draw the detection range in the Scene view
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, range);
+        Gizmos.DrawWireSphere(transform.position, detectionRange);
     }
 }

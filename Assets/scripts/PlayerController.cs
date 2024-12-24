@@ -61,6 +61,7 @@ public class PlayerController : CharacterBehaviour
 
     private void Update()
     {
+        
         // getting moveement inputs and sending to animator
 
         movement = move.ReadValue<Vector2>();
@@ -96,6 +97,8 @@ public class PlayerController : CharacterBehaviour
     private Rigidbody2D rb;
     void FixedUpdate()
     {
+        //if dead then skip logic
+        if (isDead) return;
         //actual movement here
         //sprinting
         if (isSprinting) { rb.MovePosition(rb.position + movement.normalized * sprintSpeed * Time.fixedDeltaTime); }
@@ -199,7 +202,7 @@ public class PlayerController : CharacterBehaviour
                 // checking for door
                 if (ray.collider.CompareTag("Door"))
                 {
-                    ray.transform.GetComponent<DoorManager>().OpenDoor();
+                    ray.transform.GetComponent<DoorManager>().OpenDoorWithKey();
                 }
             }
         }
@@ -219,7 +222,7 @@ public class PlayerController : CharacterBehaviour
                 // checking for door
                 if (ray.collider.CompareTag("Door"))
                 {
-                    ray.transform.GetComponent<DoorManager>().OpenDoor();
+                    ray.transform.GetComponent<DoorManager>().OpenDoorWithKey();
                 }
 
             }
@@ -239,7 +242,7 @@ public class PlayerController : CharacterBehaviour
                 // checking for door
                 if (ray.collider.CompareTag("Door"))
                 {
-                    ray.transform.GetComponent<DoorManager>().OpenDoor();
+                    ray.transform.GetComponent<DoorManager>().OpenDoorWithKey();
                 }
             }
         }
@@ -258,7 +261,7 @@ public class PlayerController : CharacterBehaviour
                 // checking for door
                 if (ray.collider.CompareTag("Door"))
                 {
-                    ray.transform.GetComponent<DoorManager>().OpenDoor();
+                    ray.transform.GetComponent<DoorManager>().OpenDoorWithKey();
                 }
             }
         }

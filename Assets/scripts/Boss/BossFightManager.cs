@@ -9,14 +9,8 @@ public class BossFightManager : MonoBehaviour
     public GameObject player;  // Reference to the player
     public BossUI bossUI;  // Reference to the boss health UI
     public PlayableDirector timelineDirector;  // Timeline component for the cutscene
-    private BossEffects bossEffects;
-
-    private void Start()
-    {
-        bossEffects = GetComponent<BossEffects>();
-    }
-
-
+    public BossEffects bossEffects;
+    
     public bool isFightActive = false;
 
     public void StartBossFight()
@@ -30,8 +24,9 @@ public class BossFightManager : MonoBehaviour
     public void EndBossFight()
     {
         isFightActive = false;
-        crocodile.gameObject.SetActive(false);
         bossUI.HideHealthBar();
+        bossEffects.PlayDeath();
+
     }
 
     public void TriggerCutsceneAndStartFight()

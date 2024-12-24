@@ -1,3 +1,4 @@
+using Pathfinding.Examples;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -31,11 +32,11 @@ public class CrocBoss : BossBase
     public Transform player;
     public Collider2D waterCollider;
     public Animator biteAnimator;  // Animator for the bite attack
+    public DoorManager doorManager; //door to key room
+    public BossEffects bossEffects;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
     private Collider2D hurtBox;
-
-    private BossEffects bossEffects;
     private BossFightManager fightManager;
 
     [Space]
@@ -52,18 +53,17 @@ public class CrocBoss : BossBase
     protected override void Start()
     {
         base.Start();
+        //setting states
         currentState = BossState.Idle;
         previousState = currentState;
+
         // Get references to the health and UI scripts
         bossHealth = GetComponent<BossHealth>();
-        bossEffects = GetComponent<BossEffects>();
-
         animator = GetComponent<Animator>();
-
         spriteRenderer = GetComponent<SpriteRenderer>();
-
         hurtBox = GetComponent<Collider2D>();
         fightManager = GetComponent<BossFightManager>();
+
         // Subscribe to health change and death events
         if (bossHealth != null)
         {
@@ -193,6 +193,8 @@ public class CrocBoss : BossBase
         // Set hitbox position
         biteAnimator.transform.position = attackPosition;
         biteAnimator.SetTrigger("bite");
+        //play bite noise
+        bossEffects.PlayBite();
 
         yield return new WaitForSeconds(delay);
 
@@ -245,6 +247,7 @@ public class CrocBoss : BossBase
         spriteRenderer.enabled = false; // Hide the boss sprite
         hurtBox.enabled = false; // Disable the collider
         bossEffects.PlaySplashEffect(); // Play a visual effect for diving
+        bossEffects.PlayRoar();
     }
 
     private void ReappearBoss()
@@ -301,6 +304,7 @@ public class CrocBoss : BossBase
         spriteRenderer.enabled = false;
         hurtBox.enabled = false;
         animator.enabled = false;
+        doorManager.OpenDoor();
     }
     private IEnumerator PrintState()
     {

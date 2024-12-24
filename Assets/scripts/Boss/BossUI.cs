@@ -19,10 +19,6 @@ public class BossUI : MonoBehaviour
 
         UpdateHealthBar(bossHealth.currentHealth);  // Initialize the health bar with current health
     }
-    private void Update()
-    {
-        
-    }
 
     void OnDestroy()
     {
@@ -48,10 +44,6 @@ public class BossUI : MonoBehaviour
     // Called when the boss dies to hide the health bar
     public void HideHealthBar()
     {
-        foreach (var segment in healthSegments)
-        {
-            segment.enabled = false;  // Hide all health segments
-        }
         bossUIHolder.SetActive(false);
     }
     public void ShowHealthBar()

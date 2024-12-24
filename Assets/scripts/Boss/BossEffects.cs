@@ -4,13 +4,29 @@ using UnityEngine;
 public class BossEffects : MonoBehaviour
 {
     public AudioClip roarSound;
+    public AudioClip biteSound;
+    public AudioClip deathSound;
     public AudioSource audioSource;
     public ParticleSystem splashEffect;
 
 
     public void PlayRoar()
     {
-        audioSource.PlayOneShot(roarSound);
+        audioSource.clip = roarSound;
+        audioSource.Play();
+    }
+
+    public void PlayBite()
+    { 
+        audioSource.clip = biteSound;
+        audioSource.Play();
+
+    }
+    public void PlayDeath()
+    { 
+        audioSource.clip = deathSound;
+        audioSource.Play();
+
     }
 
     public void PlaySplashEffect()
@@ -26,6 +42,7 @@ public class BossEffects : MonoBehaviour
             Debug.LogWarning("No particle system set for the splash");
         }
     }
+    
     private IEnumerator DisableParticleSystemAfterPlay()
     {
         //Wait for duration of splash, then disable

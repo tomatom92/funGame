@@ -83,6 +83,7 @@ public class HPBar : MonoBehaviour
         if (hpRemaining <= 0)
         {
             Die();
+            
         }
         else
         {
@@ -147,9 +148,9 @@ public class HPBar : MonoBehaviour
         charCollider.enabled = false;
 
         // Handle death-specific logic
+        character.isDead = true;
         if (gameObject.CompareTag("Player"))
         {
-            PlayerController.instance.enabled = false;
             deathGUI.SetActive(true);
         }
         if (gameObject.CompareTag("Enemy"))

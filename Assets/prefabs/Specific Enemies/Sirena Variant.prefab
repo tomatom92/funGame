@@ -66,6 +66,11 @@ PrefabInstance:
       objectReference: {fileID: 3958483287540290211}
     - target: {fileID: 2345421864564033297, guid: 6e7c44a373b977d42818fc1536a4ce3b,
         type: 3}
+      propertyPath: detectionRange
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2345421864564033297, guid: 6e7c44a373b977d42818fc1536a4ce3b,
+        type: 3}
       propertyPath: spriteRenderer
       value: 
       objectReference: {fileID: 6148676400751369327}

@@ -32,7 +32,7 @@ public class BossHealth : MonoBehaviour
             fightManager.EndBossFight();
         }
     }
-    // Optionally, a method to heal the boss
+
     public void Heal(float amount)
     {
         currentHealth += amount;
