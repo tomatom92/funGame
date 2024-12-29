@@ -30,39 +30,45 @@ public class CameraSwitcher : MonoBehaviour
             c.enabled = c == targetCamera;
         }
     }
-
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D collider)
     {
-        DarkZone(collision);
-        
-        if (collision.CompareTag(triggerTag))
+        if (collider.CompareTag("DarkZone"))
         {
-            CinemachineVirtualCamera targetCamera = collision.GetComponentInChildren<CinemachineVirtualCamera>();
-
-            SwitchCamera(targetCamera);
+            EnableDarkZone(collider);
         }
-    }
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        DarkZone(collision);
-    }
-    public void DarkZone(Collider2D collider)
-    {
-        if (!collider.CompareTag("DarkZone"))
+        if (collider.CompareTag(triggerTag))
         {
-            darknessOverlay.SetActive(false);
-            foreach (SpriteRenderer sr in darkMask)
-                sr.enabled = false;
-        }
-        else
-        {
-            darknessOverlay.SetActive(true);
-            foreach (SpriteRenderer sr in darkMask)
-                sr.enabled = true;
             CinemachineVirtualCamera targetCamera = collider.GetComponentInChildren<CinemachineVirtualCamera>();
 
             SwitchCamera(targetCamera);
         }
+    }
+
+    private void OnTriggerExit2D(Collider2D collider)
+    {
+        if (collider.CompareTag("DarkZone"))
+        {
+            DisableDarkZone();
+        }
+    }
+    private void EnableDarkZone(Collider2D collider)
+    {
+        darknessOverlay.SetActive(true);
+        foreach (SpriteRenderer sr in darkMask)
+            sr.enabled = true;
+
+        CinemachineVirtualCamera targetCamera = collider.GetComponentInChildren<CinemachineVirtualCamera>();
+        if (targetCamera != null)
+        {
+            SwitchCamera(targetCamera);
+        }
+    }
+
+    private void DisableDarkZone()
+    {
+        darknessOverlay.SetActive(false);
+        foreach (SpriteRenderer sr in darkMask)
+            sr.enabled = false;
     }
     //private void OnTriggerExit2D(Collider2D collision)
     //{

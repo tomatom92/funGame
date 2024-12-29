@@ -14,12 +14,14 @@ public class CutsceneController : MonoBehaviour
     public void StartCutscene()
     {
         //disable the follow camera and activate the cutscene camera
+        if (followCamera == null || cutsceneCamera == null) return;
         followCamera.gameObject.SetActive(false);
         cutsceneCamera.gameObject.SetActive(true);
     }
     public void EndCutscene()
     {
         //disable the cutscene camera and enable the follow camera
+        if (followCamera == null || cutsceneCamera == null) return;
         cutsceneCamera.gameObject.SetActive(false);
         followCamera.gameObject.SetActive(true);
     }
@@ -28,18 +30,18 @@ public class CutsceneController : MonoBehaviour
         triggered = false;
     }
 
-    //private void OnTriggerEnter2D(Collider2D collision)
-    //{
-        
-    //    if (collision.CompareTag("Player"))
-    //    {
-    //        if (triggered) return;
-    //        triggered = true;
-    //        Debug.Log("entered zone");
-    //        StartCutscene();
-    //        pb.Play();
-            
-    //    }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
 
-    //}
+        if (collision.CompareTag("Player"))
+        {
+            if (triggered) return;
+            triggered = true;
+            Debug.Log("entered zone");
+            StartCutscene();
+            pb.Play();
+
+        }
+
+    }
 }

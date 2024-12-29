@@ -2,17 +2,35 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class ProjectileBehaviour : MonoBehaviour
 {
-    public int projectileDamage = 1;
+    [SerializeField] private GameObject fireEffectPrefab; // Assign your fire prefab in the Inspector
+    private FireEffect fireEffect;
+
+    [Header("bullet stats")]
+    [SerializeField] private float knockBackForce = 10f;
+    [SerializeField] private int projectileDamage = 1;
+    public float projectileSpeed = 1;
     private bool isPlayerProj;
     private bool isEnemyProj;
-    [SerializeField] private float knockBackForce = 10f;
+    [Space]
+    [Header("specific projectile stats")]
+    [SerializeField] private float redFireInterval = 0.2f; // Interval between each fire effect spawn
+    [SerializeField] private float fireDuration = 3.0f; // Duration the fire exists
+
+
     Animator animator;
-    public GameObject bulletOwner;
-    public float bulletDamage;
-    private Collider2D bulletCollider;
+    Collider2D bulletCollider;
+
+
+
+
+    private void OnDestroy()
+    {
+        CancelInvoke();
+    }
 
     private void Awake()
     {
@@ -41,6 +59,47 @@ public class ProjectileBehaviour : MonoBehaviour
         Destroy(gameObject, animTime + 0.5f);
     }
 
+    public void ApplyElementalEffect(GameObject projectile, OrbUi.Orb activeOrbType)
+    {
+        switch (activeOrbType)
+        {
+            case OrbUi.Orb.Red:
+                
+                InvokeRepeating(nameof(SpawnFire), 0f, redFireInterval);
+                break;
+
+            case OrbUi.Orb.Yellow:
+
+                break;
+
+            case OrbUi.Orb.Green:
+
+                break;
+
+            case OrbUi.Orb.Blue:
+
+                break;
+
+            case OrbUi.Orb.none:
+                // Default behavior
+                break;
+        }
+    }
+
+    public void SpawnFire()
+    {
+        // Position the fire effect behind the projectile
+        Vector3 spawnPosition = transform.position;
+
+        Debug.Log("SpawnFireBehindProjectile");
+
+        // Instantiate the fire effect
+        GameObject fireEffect = Instantiate(fireEffectPrefab, spawnPosition, Quaternion.identity);
+
+        // Destroy the fire effect after the specified duration
+        Destroy(fireEffect, fireDuration);
+
+    }
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision != null)

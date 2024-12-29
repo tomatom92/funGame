@@ -15,22 +15,36 @@ public class PlayerController : CharacterBehaviour
     public static PlayerController instance;
     private Animator animator;
 
+
     [Space]
     [Header("Character stats")]
     [SerializeField] private float meleeSpeed;
     [SerializeField] private float damage;
     [SerializeField] private float PROJECTILE_BASE_SPEED = 1.0f;
     [SerializeField] private float interactDist;
-    private float attackCooldown = 0; //tracks cooldown
-    [SerializeField, Range(0, 1)] float fireDelay = 1f; // Cooldown duration (time between attacks)
-
     public float moveSpeed = 5f;
     public float sprintSpeed;
     [HideInInspector] public bool isSprinting;
 
+    private float attackCooldown = 0; //tracks cooldown
+    private float currentOrbCooldown = 0f; // Tracks the cooldown of the currently active orb
+
+    [Header("bulletCooldowns")]
+    [SerializeField, Range(0, 1)] float fireDelay = 1f; // Cooldown duration (time between attacks)
+
+    public float defaultCooldown = 1f;
+    public float redCooldown = 0.6f;
+    public float yellowCooldown = 1.2f;
+    public float greenCooldown = 1.2f;
+    public float blueCooldown = 1f;
+
+    private Dictionary<OrbUi.Orb, float> bulletCooldowns;
+
     [Space]
     [Header("info")]
     public Vector2 playerDir;
+
+
     [HideInInspector]
     public HPBar playerHPBar;
 
@@ -42,7 +56,11 @@ public class PlayerController : CharacterBehaviour
 
     [Space]
     [Header("Prefabs")]
-    public GameObject bullet;
+    public GameObject normalBullet;
+    public GameObject redBullet;
+    public GameObject yellowBullet;
+    public GameObject greenBullet;
+    public GameObject blueBullet;
 
     //movement inputs go here
     private Vector2 movement;
@@ -55,8 +73,15 @@ public class PlayerController : CharacterBehaviour
         playerControls = new PlayerInputActions();
         playerHPBar = GetComponent<HPBar>();
         animator = GetComponent<Animator>();
-        //weaponGraphics = transform.GetChild(0).GetComponent<WeaponGraphics>();
 
+        bulletCooldowns = new Dictionary<OrbUi.Orb, float>
+        {
+            { OrbUi.Orb.none, defaultCooldown },    // Default projectile
+            { OrbUi.Orb.Red, redCooldown },     // Red orb fires faster
+            { OrbUi.Orb.Yellow, yellowCooldown },  // Yellow orb fires the fastest
+            { OrbUi.Orb.Green, greenCooldown },   // Green orb fires slower
+            { OrbUi.Orb.Blue, blueCooldown }     // Blue orb normal speed
+        };
     }
 
     private void Update()
@@ -145,26 +170,49 @@ public class PlayerController : CharacterBehaviour
 
     }
 
-
     private void Fire(InputAction.CallbackContext context)
     {
+        // Determine the projectile type based on the active orb
+        GameObject projectilePrefab = GetProjectilePrefab();
+
+        // Get the current active orb type from the OrbUi instance
+        OrbUi.Orb activeOrbType = OrbUi.instance.GetActiveOrbType();
+
+        // Determine the cooldown for the active orb
+        if (bulletCooldowns.TryGetValue(activeOrbType, out float cooldown))
+        {
+            currentOrbCooldown = cooldown;
+        }
+        else
+        {
+            Debug.LogWarning($"Cooldown not found for orb type: {activeOrbType}. Using default.");
+            currentOrbCooldown = 1.0f; // Fallback to default cooldown
+        }
+
         // Check if the cooldown has finished
         if (attackCooldown <= 0)
         {
-            // Reset the cooldown timer
-            attackCooldown = fireDelay;
+            // Reset cooldown timer
+            attackCooldown = currentOrbCooldown;
 
-            // Direction and normalizing it
+            // Direction and normalization
             Vector2 shootingDir = playerDir;
             shootingDir.Normalize();
 
-            // Create projectile
-            GameObject projectile = Instantiate(bullet, transform.position, Quaternion.identity);
-            ProjectileBehaviour projectileScript = projectile.GetComponent<ProjectileBehaviour>();
-            projectileScript.SetPlayerProj(true);
+            // Create the projectile
+            GameObject projectile = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
 
-            // Shooting projectile in shooting direction
-            projectile.GetComponent<Rigidbody2D>().velocity = shootingDir * PROJECTILE_BASE_SPEED;
+            Debug.Log(projectile.name);
+            
+            ProjectileBehaviour prodBehav = projectile.GetComponent<ProjectileBehaviour>();
+            //set projectile variables
+            float orbSpeed = prodBehav.projectileSpeed;
+            prodBehav.SetPlayerProj(true);
+            //elemental effect
+            prodBehav.ApplyElementalEffect(projectile, activeOrbType);
+
+            //speed up and rotate towards shooting direction.
+            projectile.GetComponent<Rigidbody2D>().velocity = shootingDir * PROJECTILE_BASE_SPEED * orbSpeed;
             projectile.transform.Rotate(0, 0, Mathf.Atan2(shootingDir.y, shootingDir.x) * Mathf.Rad2Deg);
 
             // Destroy the projectile after 2 seconds
@@ -173,6 +221,25 @@ public class PlayerController : CharacterBehaviour
         else
         {
             Debug.Log("Attack on cooldown. Time remaining: " + attackCooldown);
+        }
+    }
+
+    private GameObject GetProjectilePrefab()
+    {
+        OrbUi.Orb activeOrb = OrbUi.instance?.GetActiveOrbType() ?? OrbUi.Orb.none;
+
+        switch (activeOrb)
+        {
+            case OrbUi.Orb.Red:
+                return redBullet;
+            case OrbUi.Orb.Yellow:
+                return yellowBullet;
+            case OrbUi.Orb.Green:
+                return greenBullet;
+            case OrbUi.Orb.Blue:
+                return blueBullet;
+            default:
+                return normalBullet;
         }
     }
     private void Interact(InputAction.CallbackContext context)

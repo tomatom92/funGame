@@ -11,7 +11,18 @@ public class QuestClass : ItemClass
     [Header("QuestItem")]
     //data specific to Tool class
     public int QuestItemID;
+    public ItemType itemType;
+    public enum ItemType
+    {
+        fetchQuest,
+        orb
 
+    }
+
+    public override bool IsOrb()
+    {
+        return itemType == ItemType.orb;
+    }
 
     public override QuestClass GetQuest() { return this; }
 

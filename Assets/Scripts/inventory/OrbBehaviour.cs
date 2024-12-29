@@ -5,13 +5,13 @@ using UnityEngine;
 public class OrbBehaviour : InteractableObject
 {
     [SerializeField] private QuestClass orbData;
-    [SerializeField] private int orbID;
+    private int orbID;
 
 
     protected override void Awake()
     {
         base.Awake();
-        orbData.QuestItemID = orbID;
+        orbID = orbData.QuestItemID;
         orbData.itemName = name;
         orbData.icon = GetComponent<SpriteRenderer>().sprite;
     }

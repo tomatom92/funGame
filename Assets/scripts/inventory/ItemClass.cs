@@ -9,6 +9,11 @@ public class ItemClass : ScriptableObject
     public string itemName;
     public Sprite icon;
     public bool isStackable = true;
+    public virtual bool IsOrb()
+    {
+        return false;
+    }
+
 
     public virtual ItemClass GetItem() { return this; }
     public virtual ToolClass GetTool() { return null; }
