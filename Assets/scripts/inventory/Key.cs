@@ -11,9 +11,9 @@ public class Key : InteractableObject
     [SerializeField] private int keyNum;
     
 
-    protected override void Awake()
+    protected override void Start()
     {
-        base.Awake();
+        base.Start();
         keyData.toolID = keyNum;
         keyData.itemName = name;
         keyData.icon = GetComponent<SpriteRenderer>().sprite;

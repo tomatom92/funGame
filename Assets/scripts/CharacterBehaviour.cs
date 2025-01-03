@@ -10,7 +10,7 @@ public class CharacterBehaviour : MonoBehaviour
     public SpriteRenderer spriteRenderer;
     public bool isDead = false;
 
-    protected virtual void Start()
+    protected virtual void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
     }

@@ -8,9 +8,9 @@ public class Gem : InteractableObject
     [SerializeField] private int gemID;
 
 
-    protected override void Awake()
+    protected override void Start()
     {
-        base.Awake();
+        base.Start();
         gemData.QuestItemID = gemID;
         gemData.itemName = name;
         gemData.icon = GetComponent<SpriteRenderer>().sprite;

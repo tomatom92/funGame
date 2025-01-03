@@ -118,7 +118,7 @@ public class ProjectileBehaviour : MonoBehaviour
                 GameObject enemy = collision.gameObject;
                 Vector2 enemyPos = rb.transform.position;
                 hpBar.RemoveHeart(projectileDamage);
-                Debug.Log($"{collision.name} ENEMY HIT WITH PROJECTILE!");
+                Debug.Log($"{collision.transform.GetChild(0).name} ENEMY HIT WITH PROJECTILE!");
 
                 //enemy Knockback
                 Vector2 direction = (enemyPos - bulletPos).normalized;

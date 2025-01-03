@@ -14,7 +14,7 @@ public class OrbUi : MonoBehaviour
     public GameObject activeOrbSlot;
     public QuestClass[] orbs;
     public static OrbUi instance;
-    private Orb orbEnum;
+    private Orb orbEnum = Orb.none;
 
     InventoryController inventory;
     QuestClass activeOrb;
@@ -27,12 +27,15 @@ public class OrbUi : MonoBehaviour
         Blue,
         none
     }
+    private void Awake()
+    {
+        instance = this;
+    }
 
     void Start()
     {
-        instance = this;
+        
         inventory = InventoryController.instance;
-        orbEnum = Orb.none;
         // Add click listeners to each button
         for (int i = 0; i < orbSlotButtons.Length; i++)
         {
@@ -130,7 +133,7 @@ public class OrbUi : MonoBehaviour
             // Update active orb slot visuals
             activeOrbSlot.transform.GetChild(1).GetComponent<Image>().sprite = activeOrb.icon;
             activeOrbSlot.transform.GetChild(3).GetComponent<TextMeshProUGUI>().text = activeOrb.itemName;
-
+            //changing player color based on weapon
             switch (orbEnum)
             {
                 case Orb.Blue:

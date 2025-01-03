@@ -7,6 +7,6 @@ public class ConsumableClass : ItemClass
 
     [Header("consumable")]
     //data specific to consumable class
-    public float healthAdded;
+    public int healthAdded;
     public override ConsumableClass GetConsumable() { return this; }
 }

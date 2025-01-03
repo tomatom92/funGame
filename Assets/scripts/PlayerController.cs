@@ -19,6 +19,7 @@ public class PlayerController : CharacterBehaviour
     [Space]
     [Header("Character stats")]
     [SerializeField] private float meleeSpeed;
+    [SerializeField] private float bombDelay = 1f;
     [SerializeField] private float damage;
     [SerializeField] private float PROJECTILE_BASE_SPEED = 1.0f;
     [SerializeField] private float interactDist;
@@ -26,8 +27,9 @@ public class PlayerController : CharacterBehaviour
     public float sprintSpeed;
     [HideInInspector] public bool isSprinting;
 
-    private float attackCooldown = 0; //tracks cooldown
+    private float attackCooldown = 0; //tracks attack cooldown
     private float currentOrbCooldown = 0f; // Tracks the cooldown of the currently active orb
+    private float bombCooldown = 0f; // Tracks the cooldown of bomb
 
     [Header("bulletCooldowns")]
     [SerializeField, Range(0, 1)] float fireDelay = 1f; // Cooldown duration (time between attacks)
@@ -53,6 +55,7 @@ public class PlayerController : CharacterBehaviour
     private InputAction interact;
     private InputAction sprint;
     private InputAction sprintRelease;
+    private InputAction bomb;
 
     [Space]
     [Header("Prefabs")]
@@ -61,11 +64,12 @@ public class PlayerController : CharacterBehaviour
     public GameObject yellowBullet;
     public GameObject greenBullet;
     public GameObject blueBullet;
+    public GameObject bombPrefab;
 
     //movement inputs go here
     private Vector2 movement;
 
-    private void Awake()
+    protected override void Awake()
     {
         instance = this;
         float sprintSpeed = moveSpeed * 1.5f;
@@ -116,6 +120,11 @@ public class PlayerController : CharacterBehaviour
         {
             attackCooldown -= Time.deltaTime;
         }
+        //bomb timer
+        if (bombCooldown > 0)
+        {
+            bombCooldown -= Time.deltaTime;
+        }
 
 
     }
@@ -153,6 +162,10 @@ public class PlayerController : CharacterBehaviour
         sprintRelease = playerControls.Player.SprintRelease;
         sprintRelease.Enable();
         sprintRelease.performed += SprintRelease;
+        bomb = playerControls.Player.Bomb;
+        bomb.Enable();
+        bomb.performed += Bomb;
+
 
 
     }
@@ -162,6 +175,7 @@ public class PlayerController : CharacterBehaviour
         move.Disable();
         fire.Disable();
         interact.Disable();
+        bomb.Disable();
     }
 
 
@@ -202,7 +216,7 @@ public class PlayerController : CharacterBehaviour
             // Create the projectile
             GameObject projectile = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
 
-            Debug.Log(projectile.name);
+            //Debug.Log(projectile.name);
             
             ProjectileBehaviour prodBehav = projectile.GetComponent<ProjectileBehaviour>();
             //set projectile variables
@@ -342,5 +356,14 @@ public class PlayerController : CharacterBehaviour
     private void SprintRelease(InputAction.CallbackContext context)
     {
         isSprinting = false;
+    }
+    private void Bomb(InputAction.CallbackContext context)
+    {
+        //create bomb at position
+        Instantiate(bombPrefab, transform.position, Quaternion.identity);
+        if(bombCooldown <= 0)
+        {
+            bombCooldown = bombDelay;
+        }
     }
 }

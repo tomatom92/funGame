@@ -24,7 +24,7 @@ public class RockBehaviour : InteractableObject
             isBroken = true;
             audioSource.Play();
             spriteRenderer.enabled = false;
-            itemCollider.enabled = false;
+            z_collider.enabled = false;
 
         }
         else

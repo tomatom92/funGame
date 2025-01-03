@@ -92,6 +92,11 @@ public class HPBar : MonoBehaviour
         //Debug.Log($"{gameObject.name}, removed {heartAmount} hearts");
 
     }
+    public void AddHeart(int heartAmount)
+    {
+        hpRemaining += heartAmount;
+        RefreshHP();
+    }
     private void ActivateInvincibility()
     {
         isInvincible = true;

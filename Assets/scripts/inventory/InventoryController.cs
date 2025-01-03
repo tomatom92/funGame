@@ -8,25 +8,35 @@ using UnityEngine.UI;
 
 public class InventoryController : MonoBehaviour
 {
-    
+    [Header("items")]
     [SerializeField] private ItemClass itemToAdd;
     [SerializeField] private ItemClass itemToRemove;
+    [SerializeField] private ItemClass equippedItem;
+
+    [Space]
+    [Header("ui")]
     [SerializeField] private GameObject slotHolder;
     [SerializeField] private GameObject orbSlotHolder;
-    [SerializeField] private GameObject inventoryObject;
-    [SerializeField] private ItemClass equippedItem;
+    [SerializeField] private GameObject pauseMenu;
+    [Space]
+    [Header("pickup effect")]
+    [SerializeField] private GameObject pickupAnimationPrefab;
+
     
     public static InventoryController instance;
-    public bool opened =false;
+    public bool isPaused =false;
 
     public List<InventorySlot> items = new();
     public List<InventorySlot> orbs = new();
-    public OrbUi orbUi;
-
     private GameObject player;
     private GameObject[] slots;
+    private void Awake()
+    {
+        instance = this;
+    }
     private void Start()
     {
+        player = PlayerController.instance.gameObject;
 
         slots = new GameObject[slotHolder.transform.childCount];
 
@@ -35,39 +45,42 @@ public class InventoryController : MonoBehaviour
             slots[i] = slotHolder.transform.GetChild(i).gameObject;
         }
         RefreshUI();
-
-
+        pauseMenu.SetActive(false);
 
         //Add(itemToAdd);
         //Remove(itemToRemove);
-        
         //EquipItem(equippedItem);
 
     }
-    private void Awake()
+    private void TogglePauseMenu()
     {
-        instance = this;
-        orbUi = OrbUi.instance;
+        // Toggle pause state
+        isPaused = !isPaused;
+
+        // Show or hide the pause menu
+        pauseMenu.SetActive(isPaused);
+
+        // Freeze or unfreeze the game
+        Time.timeScale = isPaused ? 0 : 1;
+    }
+    public void ResumeGame()
+    {
+        // Resume the game and hide the pause menu
+        isPaused = false;
+        pauseMenu.SetActive(false);
+        Time.timeScale = 1;
     }
 
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.I) && opened == false)
+
+        if (Input.GetKeyDown(KeyCode.I))
         {
-            slotHolder.SetActive(true);
-            inventoryObject.SetActive(true);
-            opened = true;
-            RefreshUI();
-        }
-        else if(Input.GetKeyDown(KeyCode.I))
-        {
-            slotHolder.SetActive(false);
-            inventoryObject.SetActive(false);
-            opened = false;
+            TogglePauseMenu();
         }
 
-        
+
     }
     
     public void EquipItem(ItemClass itemToEquip)
@@ -159,7 +172,7 @@ public class InventoryController : MonoBehaviour
                     return false; // Inventory full
             }
         }
-
+        
         RefreshUI();
         return true;
     }
@@ -228,5 +241,24 @@ public class InventoryController : MonoBehaviour
                 return slot;
         }
         return null;
+    }
+
+    public void PickupAnimation(ItemClass item)
+    {
+
+        if (item != null)
+        {
+            Debug.Log("item not null");
+            GameObject pickup = Instantiate(pickupAnimationPrefab, player.transform.position, Quaternion.identity);
+            ItemAnim itemAnim = pickup.transform.GetChild(0).GetComponent<ItemAnim>();
+            pickup.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = item.icon;
+
+            itemAnim.name = item.itemName;
+            //Destroy(pickup, 3f);
+        }
+        else
+        {
+            Debug.Log("item null");
+        }
     }
 }

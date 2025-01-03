@@ -7,24 +7,14 @@ using static UnityEditor.Progress;
 
 public class Bomb : InteractableObject
 {
-
-    
-    [SerializeField]
     public MiscClass bombData;
-    
 
-    public void Collect()
-    {
-        Destroy(gameObject);
-        Debug.Log($"entered trigger {GetComponent<Collider>().gameObject.name}");
-    }
     protected override void OnTriggerEnter2D(Collider2D other)
     {
-        base.OnTriggerEnter2D(other);
-        InventoryController.instance.Add(bombData);
-        Debug.Log("collected");
-        gameObject.SetActive(false);
-
+        if (other.CompareTag("Player"))
+        {
+            Collect(bombData, 1);
+        }
 
     }
 }

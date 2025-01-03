@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.IO.LowLevel.Unsafe;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -11,23 +12,43 @@ public class ChestController : InteractableObject
     [SerializeField] private InteractableObject item;
     [SerializeField] private ItemClass chestItemClass;
     public bool isChestOpen = false;
+    [HideInInspector] public Collider2D chestCollider;
 
 
+
+    protected override void Update()
+    {
+        base.Update();
+        chestCollider = z_collider;
+        
+    }
     protected override void Awake()
     {
         base.Awake();
-        item.gameObject.SetActive(false);
-        item.transform.position = transform.position;
     }
-    
+    protected override void Start()
+    {
+        base.Start();
+        if (item != null)
+        {
+            item.GetComponent<SpriteRenderer>().enabled = false;
+            item.GetComponent<Collider2D>().enabled = false;
+            item.transform.position = transform.position;
+        }
+
+    }
+
+
     protected override void OnInteract()
     {
         
         if (!isChestOpen)
         {
-            item.gameObject.SetActive(true);
+            item.GetSpriteRenderer().enabled = true;
+            item.GetCollider().enabled = true;
+
             animator.SetBool("IsOpen", true);
-            GetComponent<BoxCollider2D>().enabled = false;
+            chestCollider.enabled = false;
             audioSource.Play();
         }
     }

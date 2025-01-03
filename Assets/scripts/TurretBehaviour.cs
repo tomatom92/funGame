@@ -11,7 +11,8 @@ public class TurretBehaviour : MonoBehaviour
     public Direction direction;
     public float shootInterval = 0.5f;
     public float detectionRange = 2f;
-    public float speed;
+    public float bulletSpeed;
+    Vector2 shootingDir;
 
     private Transform player;
     private bool inRange;
@@ -40,8 +41,15 @@ public class TurretBehaviour : MonoBehaviour
     private void Shoot()
     {
         //direction and normalizing it
-        Vector2 shootingDir = direction.ToVector2();
-        shootingDir.Normalize();
+        if (direction == Direction.Towards)
+        {
+            shootingDir = (player.position - transform.position).normalized;
+        }
+        else
+        {
+            shootingDir = direction.ToVector2();
+            shootingDir.Normalize();
+        }
 
         
         //create projectile
@@ -50,7 +58,7 @@ public class TurretBehaviour : MonoBehaviour
         projectileScript.SetEnemyProj(true);
 
         //shooting projectile in shooting direction
-        projectile.GetComponent<Rigidbody2D>().velocity = shootingDir * speed;
+        projectile.GetComponent<Rigidbody2D>().velocity = shootingDir * bulletSpeed;
 
         //rotation optional
         //projectile.transform.Rotate(0, 0, Mathf.Atan2(shootingDir.y, shootingDir.x) * Mathf.Rad2Deg);
@@ -69,7 +77,8 @@ public enum Direction
     Up,
     Down,
     Left,
-    Right
+    Right,
+    Towards
 }
 public static class DirectionExtensions
 {

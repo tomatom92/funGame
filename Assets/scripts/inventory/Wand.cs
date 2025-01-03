@@ -11,8 +11,9 @@ public class Wand : InteractableObject
     [SerializeField] private int wandNum;
     
 
-    protected override void Awake()
+    protected override void Start()
     {
+        base.Start();
         wandData.toolID = wandNum;
         wandData.itemName = name;
         wandData.icon = GetComponent<SpriteRenderer>().sprite;

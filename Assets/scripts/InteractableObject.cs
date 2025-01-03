@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
 public class InteractableObject : CollidableObject
@@ -9,15 +10,21 @@ public class InteractableObject : CollidableObject
     protected AudioSource audioSource;
     protected Animator animator;
     protected SpriteRenderer spriteRenderer;
-    protected Collider2D itemCollider;
+
 
     protected virtual void Awake()
     {
-        itemCollider = GetComponent<Collider2D>();
         audioSource = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
+    protected override void Start()
+    {
+        base.Start();
+    }
+
+    public SpriteRenderer GetSpriteRenderer() {  return spriteRenderer; }
+    public Collider2D GetCollider() {  return z_collider; }
     protected override void OnCollided(GameObject collidedObject)
     {
         if (Input.GetKeyDown(KeyCode.E))
@@ -41,14 +48,15 @@ public class InteractableObject : CollidableObject
             InventoryController.instance.Add(item);
         }
 
-        Debug.Log($"collected {gameObject.name}");
+        Debug.Log($"collected {item.itemName}");
+        InventoryController.instance.PickupAnimation(item);
         audioSource.Play();
 
         if (animator != null)
             animator.enabled = false;
 
         spriteRenderer.enabled = false;
-        itemCollider.enabled = false;
+        z_collider.enabled = false;
     }
     protected virtual void OnInteract()
     {
@@ -62,7 +70,9 @@ public class InteractableObject : CollidableObject
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Bullet")) return;
-        Debug.Log($"entered trigger {collision.gameObject.name}");
+        //Debug.Log($"entered trigger {collision.gameObject.name}");
 
     }
+    
+    
 }

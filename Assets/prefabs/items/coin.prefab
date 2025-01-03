@@ -115,7 +115,10 @@ MonoBehaviour:
     minNormalAngle: 0
     maxNormalAngle: 0
   z_disappear: 0
+  spriteRenderer: {fileID: 0}
+  itemCollider: {fileID: 0}
   CoinData: {fileID: 11400000, guid: e8cc50856c7223a4884de2efff952a10, type: 2}
+  amount: 0
 --- !u!61 &7300956665687559656
 BoxCollider2D:
   m_ObjectHideFlags: 0

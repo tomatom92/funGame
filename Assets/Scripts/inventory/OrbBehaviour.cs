@@ -8,9 +8,9 @@ public class OrbBehaviour : InteractableObject
     private int orbID;
 
 
-    protected override void Awake()
+    protected override void Start()
     {
-        base.Awake();
+        base.Start();
         orbID = orbData.QuestItemID;
         orbData.itemName = name;
         orbData.icon = GetComponent<SpriteRenderer>().sprite;

@@ -17,8 +17,6 @@ public class EnemyController : CharacterBehaviour
     [SerializeField] float detectionRange = 5;
     [SerializeField] private int damage = 1;
     Animator animator;
-    AIPath aStar;
-    AIDestinationSetter destinationSetter;
     public bool isTouching = false;
     private HPBar playerHpbar;
     private Transform player;
@@ -32,13 +30,11 @@ public class EnemyController : CharacterBehaviour
     [HideInInspector] public NavMeshAgent agent;
     
 
-    protected override void Start()
+    void Start()
     {
         playerHpbar = PlayerController.instance.playerHPBar;
         player = PlayerController.instance.transform;
         animator = GetComponent<Animator>();
-        aStar = transform.GetComponent<AIPath>();
-        destinationSetter = GetComponent<AIDestinationSetter>();
         agent = GetComponent<NavMeshAgent>();
         agent.updateRotation = false;
         agent.updateUpAxis = false;
@@ -57,6 +53,7 @@ public class EnemyController : CharacterBehaviour
             // Move towards the player if in detection range
             if (distanceToPlayer < detectionRange)
             {
+                //Debug.Log("attacking player");
                 Vector2 direction = (player.position - transform.position).normalized;
                 animator.SetFloat("moveX", direction.x);
                 animator.SetFloat("moveY", direction.y);
@@ -72,11 +69,11 @@ public class EnemyController : CharacterBehaviour
             }
         }
 
-        
+
     }
     public void onDeath()
     {
-
+        animator.SetTrigger("Die");
     }    
     private void OnDrawGizmosSelected()
     {

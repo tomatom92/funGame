@@ -8,9 +8,9 @@ public class Pickaxe : InteractableObject
     [SerializeField] private int keyNum;
 
 
-    protected override void Awake()
+    protected override void Start()
     {
-        base.Awake();
+        base.Start();
         pickData.toolID = keyNum;
         pickData.itemName = name;
         pickData.icon = GetComponent<SpriteRenderer>().sprite;
