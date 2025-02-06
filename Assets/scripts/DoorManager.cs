@@ -22,9 +22,11 @@ public class DoorManager : MonoBehaviour
     [SerializeField]
     private ToolClass keyToDoor;
     public bool doorOpened;
+    public bool playerOpenable;
 
     private void Awake()
     {
+
         doorOpened = false;
         Vector2 doorPos = transform.position;
         doorCellPosition = map.WorldToCell(doorPos);
@@ -34,6 +36,13 @@ public class DoorManager : MonoBehaviour
     {
         //Debug.Log($"reached");
         if (doorOpened) return;
+        if (!playerOpenable) return;
+
+        if(keyToDoor == null)
+        {
+            Debug.Log($"no key set for {gameObject.name}");
+            return;
+        }
 
         if (InventoryController.instance.Remove(keyToDoor))
         {

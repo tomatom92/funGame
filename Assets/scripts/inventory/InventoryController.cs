@@ -180,30 +180,10 @@ public class InventoryController : MonoBehaviour
 
     public bool Remove(ItemClass item)
     {
-        if (item.IsOrb() && item != null) // If item is an orb
+        if (item != null) 
         {
-            InventorySlot orbSlot = ContainsOrb(item);
-            if (orbSlot != null)
-            {
-                if (orbSlot.GetQuantity() > 1)
-                {
-                    orbSlot.SubQuantity(1);
-                }
-                else
-                {
-                    orbs.Remove(orbSlot); // Remove orb entirely
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
-            // Handle normal item logic
             InventorySlot temp = Contains(item);
-            if (temp != null)
+            if (temp != null)// if temp is null, the item is not in inventory, if not then it is.
             {
                 if (temp.GetQuantity() > 1)
                 {

@@ -83,7 +83,7 @@ public class CrocBoss : BossBase
         //check if spawned enemies are dead
         spawnedEnemies.RemoveAll(enemy => enemy == null);
 
-        StartCoroutine(PrintState());
+        //StartCoroutine(PrintState());
         HandleStates();
         attackTimer -= Time.deltaTime;
     }
@@ -205,7 +205,6 @@ public class CrocBoss : BossBase
     {
         if (previousState != BossState.SpawnEnemy)
         {
-            bossEffects.PlayRoar();
             HideBoss(); // Make the boss dive underwater
         }
 
